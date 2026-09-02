@@ -15,6 +15,96 @@ Sistema desenvolvido para substituir condicionais complexas em uma seguradora, s
 - **RF03 (Apólice Vida):** Prêmio calculado por $(\text{idade} \times 12) + (\text{capital segurado} \times 0,002)$. Acréscimo de 50% para fumantes. Exigência de atestado médico se capital > R$ 500.000,00. Docs: RG, CPF, Atestado Médico (quando aplicável).
 - **RF04 (Apólice Viagem):** Prêmio calculado por $\text{dias} \times \text{RS } 15,00$ (+ R$ 100,00 se internacional). Exigência de assistência médica $\ge \text{US } 30.000,00$ e passaporte para viagens internacionais. Docs: Itinerário, Passaporte (quando aplicável).
 
+### Diagrama de Classes
+
+```mermaid
+classDiagram
+    class Apolice {
+        <<abstract>>
+        # numeroApolice: int
+        # segurado: String
+        # dataEmissao: Date
+        # premio: double
+        + calcularPremio() double
+        + validarCobertura() boolean
+        + listarDocumentos() List~String~
+        + gerarResumo() String
+    }
+ 
+    class ApoliceAuto {
+        - valorTabelaFipe: double
+        - idadeCondutor: int
+        - anosHabilitacao: int
+        - coberturaTerceiros: double
+        + calcularPremio()* double
+        + validarCobertura()* boolean
+        + listarDocumentos()* List~String~
+    }
+    class ApoliceResidencial {
+        - valorImovel: double
+        - altoPadrao: boolean
+        - possuiEscrituraOuContrato: boolean
+        + calcularPremio()* double
+        + validarCobertura()* boolean
+        + listarDocumentos()* List~String~
+    }
+    class ApoliceVida {
+        - idadeSegurado: int
+        - capitalSegurado: double
+        - fumante: boolean
+        - possuiAtestadoMedico: boolean
+        + calcularPremio()* double
+        + validarCobertura()* boolean
+        + listarDocumentos()* List~String~
+    }
+    class ApoliceViagem {
+        - diasViagem: int
+        - destinoInternacional: boolean
+        - coberturaAssistenciaMedica: double
+        - possuiPassaporte: boolean
+        + calcularPremio()* double
+        + validarCobertura()* boolean
+        + listarDocumentos()* List~String~
+    }
+ 
+    Apolice <|-- ApoliceAuto
+    Apolice <|-- ApoliceResidencial
+    Apolice <|-- ApoliceVida
+    Apolice <|-- ApoliceViagem
+ 
+    class CriadorApolice {
+        <<abstract>>
+        + criarApolice()* Apolice
+        + processarContratacao() String
+    }
+ 
+    class CriadorAuto {
+        + criarApolice()* Apolice
+    }
+    class CriadorResidencial {
+        + criarApolice()* Apolice
+    }
+    class CriadorVida {
+        + criarApolice()* Apolice
+    }
+    class CriadorViagem {
+        + criarApolice()* Apolice
+    }
+ 
+    CriadorApolice <|-- CriadorAuto
+    CriadorApolice <|-- CriadorResidencial
+    CriadorApolice <|-- CriadorVida
+    CriadorApolice <|-- CriadorViagem
+ 
+    class Cliente
+ 
+    Cliente ..> CriadorApolice : usa
+    CriadorAuto ..> ApoliceAuto : cria
+    CriadorResidencial ..> ApoliceResidencial : cria
+    CriadorVida ..> ApoliceVida : cria
+    CriadorViagem ..> ApoliceViagem : cria
+```
+
 ## Exercício 2: Checkout Internacional de Marketplace (Abstract Factory)
 
 ### Contexto
