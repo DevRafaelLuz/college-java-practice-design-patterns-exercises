@@ -117,8 +117,111 @@ Sistema de checkout para expansão internacional (Brasil, Estados Unidos e Alema
 - **Estados Unidos (US):** Sales Invoice (Sales tax por estado, EIN), Pagamento por Cartão de Crédito com verificação AVS, Etiqueta USPS (`ZIP+4`).
 - **Alemanha (DE):** VAT Invoice (Umsatzsteuer, VAT-ID), Pagamento por SEPA Direct Debit, Etiqueta Deutsche Post (`PLZ` de 5 dígitos).
 
-## Tecnologias Utilizadas
+### Tecnologias Utilizadas
 
 - **Java** (JDK 26)
 - **Orientação a Objetos Avançada** (Polimorfismo, Classes Abstratas, Interfaces)
 - Princípios **SOLID**
+
+### Diagrama de Classes
+
+```mermaid
+    classDiagram
+    direction TB
+
+    class Pedido {
+        -double valorBase
+        -String estadoOrigem
+        -String estadoDestino
+        -String cepDestino
+        -boolean produtoEssencial
+        -String opcaoPagamentoLocal
+        +getters()
+    }
+
+    class Checkout {
+        -CheckoutFactory factory
+        +Checkout(CheckoutFactory factory)
+        +finalizarPedido(Pedido pedido)
+    }
+
+    %% Interfaces Abstract Factory e Produtos
+    class CheckoutFactory {
+        <<interface>>
+        +criarDocumentoFiscal() DocumentoFiscal
+        +criarProcessadorPagamento() ProcessadorPagamento
+        +criarEtiquetaEnvio() EtiquetaEnvio
+    }
+
+    class DocumentoFiscal {
+        <<interface>>
+        +gerar(Pedido pedido) String
+    }
+
+    class ProcessadorPagamento {
+        <<interface>>
+        +processar(Pedido pedido) String
+    }
+
+    class EtiquetaEnvio {
+        <<interface>>
+        +gerarEtiqueta(Pedido pedido) String
+    }
+
+    %% Dependências do Cliente
+    Checkout --> CheckoutFactory : utiliza
+    Checkout --> DocumentoFiscal : utiliza
+    Checkout --> ProcessadorPagamento : utiliza
+    Checkout --> EtiquetaEnvio : utiliza
+    Checkout ..> Pedido
+
+    %% Fábricas Concretas
+    class BrasilFactory {
+        +criarDocumentoFiscal() DocumentoFiscal
+        +criarProcessadorPagamento() ProcessadorPagamento
+        +criarEtiquetaEnvio() EtiquetaEnvio
+    }
+    
+    class USAFactory {
+        +criarDocumentoFiscal() DocumentoFiscal
+        +criarProcessadorPagamento() ProcessadorPagamento
+        +criarEtiquetaEnvio() EtiquetaEnvio
+    }
+    
+    class AlemanhaFactory {
+        +criarDocumentoFiscal() DocumentoFiscal
+        +criarProcessadorPagamento() ProcessadorPagamento
+        +criarEtiquetaEnvio() EtiquetaEnvio
+    }
+
+    CheckoutFactory <|.. BrasilFactory
+    CheckoutFactory <|.. USAFactory
+    CheckoutFactory <|.. AlemanhaFactory
+
+    %% Produtos Concretos - Brasil
+    class NFe { +gerar(Pedido) String }
+    class PagamentoPixBoleto { +processar(Pedido) String }
+    class EtiquetaCorreios { +gerarEtiqueta(Pedido) String }
+    
+    DocumentoFiscal <|.. NFe
+    ProcessadorPagamento <|.. PagamentoPixBoleto
+    EtiquetaEnvio <|.. EtiquetaCorreios
+
+    %% Produtos Concretos - EUA
+    class SalesInvoice { +gerar(Pedido) String }
+    class PagamentoCartaoCredito { +processar(Pedido) String }
+    class EtiquetaUSPS { +gerarEtiqueta(Pedido) String }
+
+    DocumentoFiscal <|.. SalesInvoice
+    ProcessadorPagamento <|.. PagamentoCartaoCredito
+    EtiquetaEnvio <|.. EtiquetaUSPS
+
+    %% Produtos Concretos - Alemanha
+    class VATInvoice { +gerar(Pedido) String }
+    class PagamentoSEPADirectDebit { +processar(Pedido) String }
+    class EtiquetaDeutschePost { +gerarEtiqueta(Pedido) String }
+
+    DocumentoFiscal <|.. VATInvoice
+    ProcessadorPagamento <|.. PagamentoSEPADirectDebit
+    EtiquetaEnvio <|.. EtiquetaDeutschePost
+```
